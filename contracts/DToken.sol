@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -17,20 +18,27 @@ contract DToken is ERC721URIStorage, Ownable {
     IERC20 internal payToken;
 
     event CountersPreIncremented(uint256 counter);
+    event SetedFee(uint256 id, uint256 fee);
+    event Receiver(address receiver);
+    event Token(address payToken);
     
 
-    constructor(IERC20 _token) ERC721("DToken", "DTK") {
+    constructor(address _token) ERC721("DToken", "DTK") {
         setPayToken(_token);
     }
     
     
-    function setReciver(address _reciver) external onlyOwner {
-        receiver = _reciver;
+    function setReceiver(address _receiver) external onlyOwner {
+        receiver = _receiver;
+        
+        emit Receiver(_receiver);
     }
     
     
-    function setPayToken(IERC20 _token) public {
-        payToken = _token;
+    function setPayToken(address _token) public onlyOwner {
+        payToken = IERC20(_token);
+        
+        emit Token(_token);
     }
     
     
@@ -49,9 +57,11 @@ contract DToken is ERC721URIStorage, Ownable {
         _tokenIds.increment();
         uint256 _newNftTokenId = _tokenIds.current();
         
+        fees[_newNftTokenId] = _fee;
         _mint(receiver, _newNftTokenId);
         _setTokenURI(_newNftTokenId, _tokenURI);
-        fees[_newNftTokenId] = _fee;
+
+        emit SetedFee(_newNftTokenId, _fee);
 
         return _newNftTokenId;
     }
@@ -60,17 +70,19 @@ contract DToken is ERC721URIStorage, Ownable {
     function transferStuckToken(uint256 _id, address _to) external {
         address _thisAddress = address(this);
         
-        require(ownerOf(_id) == _thisAddress, "DTK: Tokens not accessed to transfer");
+        require(ownerOf(_id) == _thisAddress, "DTK: tokens not accessed to transfer");
         
         _transfer(_thisAddress, _to, _id);
     }
     
     
     function _transfer(address from, address to, uint256 tokenId) internal override {
+        uint256 _amound = fees[tokenId];
+        require(payToken.balanceOf(to) > _amound, "DTK: transfer amount exceeds balance");
+        
         super._transfer(from, to, tokenId);
         
-        uint256 _amound = fees[tokenId];
-        payToken.transferFrom(from, to, _amound);
+        payToken.transferFrom(to, from, _amound);
     }
 
 }

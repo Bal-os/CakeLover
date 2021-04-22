@@ -36,13 +36,20 @@ contract DToken is ERC721URIStorage, Ownable {
     }
     
     
-    function transferStuckToken(uint256 _id, address _to) external onlyOwner {
+     function transferStuckToken(uint256 _id, address _to) public onlyOwner {
         address _thisAddress = address(this);
         
         require(ownerOf(_id) == _thisAddress, "DTK: tokens not accessed to transfer");
         
         _transfer(_thisAddress, _to, _id);
     }
+    
+    // Be carefull with tokens amount. It should not be too big so the call will not fail on out of gas error.
+    function multiTransferStuckToken(uint256[] memory _ids, address _to) external onlyOwner {
+         for (uint256 i = 0; i < _ids.length; i++) {
+            transferStuckToken(_ids[i], _to);
+        }
+     }
     
     
     function transferStuckERC20(IERC20 _token, address _to, uint256 _amount) external onlyOwner {

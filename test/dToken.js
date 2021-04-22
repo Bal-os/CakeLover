@@ -104,7 +104,7 @@ contract('DToken', async (accounts) => {
         await dToken.mint(tokenAdress, url, gisId);
       });
 
-      it('should revert stuck token', async () => {
+      it('should return stuck token', async () => {
         const result = await dToken.transferStuckToken(1, OWNER)
 
         assert.equal(result.logs.length, 2);
@@ -115,14 +115,54 @@ contract('DToken', async (accounts) => {
         assert.equal(result.logs[1].args.to, OWNER);
       });
 
-      it('should not access revert token by not owner', async () => {
+      it('should not access return token by not owner', async () => {
           await assertReverts(dToken.transferStuckToken(1, OWNER, {from: SOMEBODY}));
       });
 
-      it('should not access to revert token that was not stucked', async () => {
+      it('should not access to return token that was not stuck', async () => {
         await dToken.mint(NOBODY, url, gisId);
 
         await assertReverts(dToken.transferStuckToken(2, OWNER));
+      });
+    });
+
+    describe('multiTransferStuckToken()', async () => {
+      const url = 'url';
+      const gisId = 5;
+
+      let tokenAdress;
+      let stuckTokenId;
+
+      beforeEach('initialize', async () => {
+        tokenAdress = dToken.address;
+
+        await dToken.mint(tokenAdress, url, gisId);
+        await dToken.mint(tokenAdress, url, gisId);
+      });
+
+      it('should return stuck token', async () => {
+        const result = await dToken.multiTransferStuckToken([1, 2], OWNER)
+
+        assert.equal(result.logs.length, 4);
+
+        assert.equal(result.logs[1].event, 'Transfer');
+        assert.equal(result.logs[3].event, 'Transfer');
+
+        assert.equal(result.logs[1].args.from, tokenAdress);
+        assert.equal(result.logs[1].args.to, OWNER);
+
+        assert.equal(result.logs[3].args.from, tokenAdress);
+        assert.equal(result.logs[3].args.to, OWNER);
+      });
+
+      it('should not access return tokens by not owner', async () => {
+          await assertReverts(dToken.multiTransferStuckToken([1, 2], OWNER, {from: SOMEBODY}));
+      });
+
+      it('should not access to return tokens that ware not stuck', async () => {
+        await dToken.mint(NOBODY, url, gisId);
+
+        await assertReverts(dToken.multiTransferStuckToken([2, 3], OWNER));
       });
     });
 
@@ -142,18 +182,18 @@ contract('DToken', async (accounts) => {
         await erc20Mock.mint(tokenAdress, sum);
       });
 
-      it('should transfer stocked erc20 tokens', async () => {
+      it('should transfer stuck erc20 tokens', async () => {
         await dToken.transferStuckERC20(mockAddress, OWNER, sum);
         const balance = await erc20Mock.balanceOf(tokenAdress);
 
         assert.equal(balance, 0);
       });
 
-      it('should not access transfer stocked erc20 tokens not owner', async () => {
+      it('should not access transfer stuck erc20 tokens not owner', async () => {
           await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum, {from: SOMEBODY}));
       });
 
-      it('should not access transfer amount of stocked erc20 that more then contract amount', async () => {
+      it('should not access transfer amount of stuck erc20 that more then contract amount', async () => {
           await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum + 1));
       });
     });

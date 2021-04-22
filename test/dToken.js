@@ -159,34 +159,4 @@ contract('DToken', async (accounts) => {
         await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum + 1));
       });
     });
-
-    // describe('transferInitial()', async () => {
-    //   let tokenAdress;
-    //   let sum;
-
-    //   beforeEach('initialize', async () => {
-    //     tokenAdress = tokenAdress;
-    //     sum = web3.utils.toWei("0.05", "ether");
-        
-    //     await web3.eth.sendTransaction({
-    //       from: web3.eth.coinbase,
-    //       to: tokenAdress,
-    //       value: sum
-    //     });
-    //   });
-
-    //   it('should transfer stocked erc20 tokens', async () => {
-    //     const result = await dToken.transferInitial(OWNER, sum);
-
-    //     assert.equal(result.logs.length, 0);
-    //   });
-
-    //   it('should not access transfer stocked tokens not owner', async () => {
-    //       await assertReverts(dToken.transferInitial(OWNER, sum , {from: SOMEBODY}));
-    //   });
-
-    //   it('should not access transfer amount of stocked tokens that more or equal to the contract amount', async () => {
-    //     await assertReverts(dToken.transferInitial(OWNER, sum + 1));
-    //   });
-    // });
 });

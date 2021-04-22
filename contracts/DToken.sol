@@ -55,9 +55,4 @@ contract DToken is ERC721URIStorage, Ownable {
         
         require(_token.transfer(_to, _amount), "DTK: Transfer failed");
     }
-    
-    
-    function transferInitial(address payable _to, uint256 _amount) external onlyOwner {
-        _to.transfer(_amount);
-    }
 }

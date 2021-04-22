@@ -139,22 +139,22 @@ contract('DToken', async (accounts) => {
         sum = 200;
         
         mockAddress = erc20Mock.address;
-        await erc20Mock.mint(tokenAdress, sum + 1);
+        await erc20Mock.mint(tokenAdress, sum);
       });
 
       it('should transfer stocked erc20 tokens', async () => {
         await dToken.transferStuckERC20(mockAddress, OWNER, sum);
         const balance = await erc20Mock.balanceOf(tokenAdress);
 
-        assert.equal(balance, 1);
+        assert.equal(balance, 0);
       });
 
       it('should not access transfer stocked erc20 tokens not owner', async () => {
-          await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum , {from: SOMEBODY}));
+          await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum, {from: SOMEBODY}));
       });
 
-      it('should not access transfer amount of stocked erc20 that more or equal to the contract amount', async () => {
-        await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum + 1));
+      it('should not access transfer amount of stocked erc20 that more then contract amount', async () => {
+          await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum + 1));
       });
     });
 });

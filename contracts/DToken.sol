@@ -46,10 +46,6 @@ contract DToken is ERC721URIStorage, Ownable {
     
     
     function transferStuckERC20(IERC20 _token, address _to, uint256 _amount) external onlyOwner {
-        uint256 _balance = _token.balanceOf(address(this));
-        
-        require(_balance > _amount, "DTK: Contract has no enough balance");
-        
         require(_token.transfer(_to, _amount), "DTK: Transfer failed");
     }
 }

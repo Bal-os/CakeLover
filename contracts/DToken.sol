@@ -15,6 +15,7 @@ contract DToken is ERC721URIStorage, Ownable {
     
     event CountersPreIncremented(uint256 counter);
     event SetedGIS(uint256 id, uint gis);
+    event BalanceOfToken(uint sum);
 
 
     constructor() ERC721("DToken", "DTK") {}
@@ -46,9 +47,13 @@ contract DToken is ERC721URIStorage, Ownable {
     
     
     function transferStuckERC20(IERC20 _token, address _to, uint256 _amount) external onlyOwner {
-        address _thisAddress = address(this);
+        uint256 _balance = _token.balanceOf(address(this));
 
-        _token.transferFrom(_thisAddress, _to, _amount);
+        emit BalanceOfToken(_balance);
+        
+        require(_balance > _amount, "DTK: Contract has no enough balance");
+        
+        require(_token.transfer(_to, _amount), "DTK: Transfer failed");
     }
     
     

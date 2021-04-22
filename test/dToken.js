@@ -138,24 +138,55 @@ contract('DToken', async (accounts) => {
         sum = 200;
         
         mockAddress = erc20Mock.address;
-        await erc20Mock.mint(tokenAdress, sum);
+        await erc20Mock.mint(tokenAdress, sum + 1);
       });
 
       it('should transfer stocked erc20 tokens', async () => {
         const result = await dToken.transferStuckERC20(mockAddress, OWNER, sum);
 
-        assert.equal(result.logs, 1);
-        assert.equal(result.logs[0].event, 'Token');
+        assert.equal(result.logs.length, 1);
 
-        assert.equal(result.logs[0].args.payToken, mockAddress);
+        assert.equal(result.logs[0].event, 'BalanceOfToken');
+
+        assert.equal(result.logs[0].args.sum, sum + 1);
       });
 
       it('should not access transfer stocked erc20 tokens not owner', async () => {
-          await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum, {from: SOMEBODY}));
+          await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum , {from: SOMEBODY}));
       });
 
-      it('should not access transfer amount of stocked erc20 that more sum', async () => {
+      it('should not access transfer amount of stocked erc20 that more or equal to the contract amount', async () => {
         await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum + 1));
       });
     });
+
+    // describe('transferInitial()', async () => {
+    //   let tokenAdress;
+    //   let sum;
+
+    //   beforeEach('initialize', async () => {
+    //     tokenAdress = tokenAdress;
+    //     sum = web3.utils.toWei("0.05", "ether");
+        
+    //     await web3.eth.sendTransaction({
+    //       from: web3.eth.coinbase,
+    //       to: tokenAdress,
+    //       value: sum
+    //     });
+    //   });
+
+    //   it('should transfer stocked erc20 tokens', async () => {
+    //     const result = await dToken.transferInitial(OWNER, sum);
+
+    //     assert.equal(result.logs.length, 0);
+    //   });
+
+    //   it('should not access transfer stocked tokens not owner', async () => {
+    //       await assertReverts(dToken.transferInitial(OWNER, sum , {from: SOMEBODY}));
+    //   });
+
+    //   it('should not access transfer amount of stocked tokens that more or equal to the contract amount', async () => {
+    //     await assertReverts(dToken.transferInitial(OWNER, sum + 1));
+    //   });
+    // });
 });

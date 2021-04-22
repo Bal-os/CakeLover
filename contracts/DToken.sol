@@ -11,17 +11,16 @@ contract DToken is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     
-    mapping(uint256 => uint) gisIds;
+    mapping(uint256 => uint256) gisIds;
     
     event CountersPreIncremented(uint256 counter);
-    event SetedGIS(uint256 id, uint gis);
-    event BalanceOfToken(uint sum);
+    event SetGIS(uint256 id, uint256 gis);
 
 
     constructor() ERC721("DToken", "DTK") {}
 
 
-    function mint(address _receiver, string memory _tokenURI, uint _gisId) external onlyOwner returns (uint256) {
+    function mint(address _receiver, string memory _tokenURI, uint256 _gisId) external onlyOwner returns (uint256) {
         emit CountersPreIncremented(_tokenIds.current());
         
         _tokenIds.increment();
@@ -31,7 +30,7 @@ contract DToken is ERC721URIStorage, Ownable {
         _setTokenURI(_newNftTokenId, _tokenURI);
         gisIds[_newNftTokenId] = _gisId;
         
-        emit SetedGIS(_newNftTokenId, _gisId);
+        emit SetGIS(_newNftTokenId, _gisId);
 
         return _newNftTokenId;
     }
@@ -48,8 +47,6 @@ contract DToken is ERC721URIStorage, Ownable {
     
     function transferStuckERC20(IERC20 _token, address _to, uint256 _amount) external onlyOwner {
         uint256 _balance = _token.balanceOf(address(this));
-
-        emit BalanceOfToken(_balance);
         
         require(_balance > _amount, "DTK: Contract has no enough balance");
         

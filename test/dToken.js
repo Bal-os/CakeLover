@@ -64,7 +64,7 @@ contract('DToken', async (accounts) => {
         assert.equal(result.logs.length, 3);
         assert.equal(result.logs[0].event, 'CountersPreIncremented');
         assert.equal(result.logs[1].event, 'Transfer');
-        assert.equal(result.logs[2].event, 'SetedGIS');
+        assert.equal(result.logs[2].event, 'SetGIS');
         
         assert.equal(result.logs[0].args.counter, 0);
         assert.equal(result.logs[1].args.tokenId, 1)
@@ -130,9 +130,10 @@ contract('DToken', async (accounts) => {
       let tokenAdress;
       let sum;
       let mockAddress;
+      let erc20Mock;
 
       beforeEach('initialize', async () => {
-        const erc20Mock = await ERC20Mock.new();
+        erc20Mock = await ERC20Mock.new();
 
         tokenAdress = dToken.address;
         sum = 200;
@@ -142,13 +143,10 @@ contract('DToken', async (accounts) => {
       });
 
       it('should transfer stocked erc20 tokens', async () => {
-        const result = await dToken.transferStuckERC20(mockAddress, OWNER, sum);
+        await dToken.transferStuckERC20(mockAddress, OWNER, sum);
+        const balance = await erc20Mock.balanceOf(tokenAdress);
 
-        assert.equal(result.logs.length, 1);
-
-        assert.equal(result.logs[0].event, 'BalanceOfToken');
-
-        assert.equal(result.logs[0].args.sum, sum + 1);
+        assert.equal(balance, 1);
       });
 
       it('should not access transfer stocked erc20 tokens not owner', async () => {

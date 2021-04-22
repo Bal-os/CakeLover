@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: UNLICENSED
 
 pragma solidity 0.8.0;
 
@@ -7,67 +7,36 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract DToken is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
-    
-    mapping(uint256 => uint256) fees;
-    
     Counters.Counter private _tokenIds;
-    address internal receiver;
-    IERC20 internal payToken;
-
+    
+    mapping(uint256 => uint) gisIds;
+    
     event CountersPreIncremented(uint256 counter);
-    event SetedFee(uint256 id, uint256 fee);
-    event Receiver(address receiver);
-    event Token(address payToken);
-    
+    event SetedGIS(uint256 id, uint gis);
 
-    constructor(address _token) ERC721("DToken", "DTK") {
-        setPayToken(_token);
-    }
-    
-    
-    function setReceiver(address _receiver) external onlyOwner {
-        receiver = _receiver;
-        
-        emit Receiver(_receiver);
-    }
-    
-    
-    function setPayToken(address _token) public onlyOwner {
-        payToken = IERC20(_token);
-        
-        emit Token(_token);
-    }
-    
-    
-    function tokenFee(uint256 _tokenId) public view returns (uint256) {
-        uint256 _fee = fees[_tokenId];
-        
-        require(_exists(_tokenId), "DTK: imposible to get fee of non-existent token");
-        
-        return _fee;
-    }
-    
 
-    function mint(string memory _tokenURI, uint256 _fee) external onlyOwner returns (uint256) {
+    constructor() ERC721("DToken", "DTK") {}
+
+
+    function mint(address _receiver, string memory _tokenURI, uint _gisId) external onlyOwner returns (uint256) {
         emit CountersPreIncremented(_tokenIds.current());
         
         _tokenIds.increment();
-        uint256 _newNftTokenId = _tokenIds.current();
-        
-        fees[_newNftTokenId] = _fee;
-        _mint(receiver, _newNftTokenId);
-        _setTokenURI(_newNftTokenId, _tokenURI);
 
-        emit SetedFee(_newNftTokenId, _fee);
+        uint256 _newNftTokenId = _tokenIds.current();
+        _mint(_receiver, _newNftTokenId);
+        _setTokenURI(_newNftTokenId, _tokenURI);
+        gisIds[_newNftTokenId] = _gisId;
+        
+        emit SetedGIS(_newNftTokenId, _gisId);
 
         return _newNftTokenId;
     }
     
     
-    function transferStuckToken(uint256 _id, address _to) external {
+    function transferStuckToken(uint256 _id, address _to) external onlyOwner {
         address _thisAddress = address(this);
         
         require(ownerOf(_id) == _thisAddress, "DTK: tokens not accessed to transfer");
@@ -76,13 +45,14 @@ contract DToken is ERC721URIStorage, Ownable {
     }
     
     
-    function _transfer(address from, address to, uint256 tokenId) internal override {
-        uint256 _amound = fees[tokenId];
-        require(payToken.balanceOf(to) > _amound, "DTK: transfer amount exceeds balance");
-        
-        super._transfer(from, to, tokenId);
-        
-        payToken.transferFrom(to, from, _amound);
-    }
+    function transferStuckERC20(IERC20 _token, address _to, uint256 _amount) external onlyOwner {
+        address _thisAddress = address(this);
 
+        _token.transferFrom(_thisAddress, _to, _amount);
+    }
+    
+    
+    function transferInitial(address payable _to, uint256 _amount) external onlyOwner {
+        _to.transfer(_amount);
+    }
 }

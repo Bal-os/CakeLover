@@ -1,6 +1,5 @@
 const DToken = artifacts.require('DToken');
 const ERC20Mock = artifacts.require('ERC20Mock');
-const TestDToken = artifacts.require('TastableDToken');
 const Reverter = require('./helpers/reverter');
 const {assertReverts} = require('./helpers/assertThrows');
 const truffleAssert = require('truffle-assertions');
@@ -11,19 +10,17 @@ function bn(number) {
 }
 
 contract('DToken', async (accounts) => {
-    const reverter = new Reverter(web3);
+  const reverter = new Reverter(web3);
   
-    let dToken;
-    let erc20Mock;
-  
-    const OWNER = accounts[0];
-    const SOMEBODY = accounts[1];
-    const NOBODY = accounts[2];
-    const ADDRESS_NULL = '0x0000000000000000000000000000000000000000';
-  
-    before('setup', async () => {
-      erc20Mock = await ERC20Mock.new();
-      dToken = await DToken.new(erc20Mock.address);
+  let dToken;
+
+  const OWNER = accounts[0];
+  const SOMEBODY = accounts[1];
+  const NOBODY = accounts[2];
+  const ADDRESS_NULL = '0x0000000000000000000000000000000000000000';
+
+  before('setup', async () => {
+    dToken = await DToken.new();
 
       await reverter.snapshot();
     });
@@ -35,13 +32,10 @@ contract('DToken', async (accounts) => {
         assert.equal(await dToken.owner(), OWNER);
 
         const result = await truffleAssert.createTransactionResult(dToken, dToken.transactionHash);
-        assert.equal(result.logs.length, 2);
+        assert.equal(result.logs.length, 1);
         assert.equal(result.logs[0].event, 'OwnershipTransferred');
         assert.equal(result.logs[0].args.previousOwner, ADDRESS_NULL);
         assert.equal(result.logs[0].args.newOwner, OWNER);
-
-        // assert.equal(result.logs[1].event, 'Receiver');
-        // assert.equal(result.logs[1].args.receiver, SOMEBODY);
       });
       
       it('should have correct name', async () => {
@@ -55,131 +49,113 @@ contract('DToken', async (accounts) => {
       })
     });
 
-    describe('setReceiver()', async () => {
-      it('should set new reciever', async () => {
-        const result = await dToken.setReceiver(SOMEBODY);
-
-        assert.equal(result.logs.length, 1);
-        assert.equal(result.logs[0].event, 'Receiver');
-        assert.equal(result.logs[0].args.receiver, SOMEBODY);
-      })
-
-      it('should not access to set new reciever by not owner', async () => {
-        await assertReverts(dToken.setReceiver(SOMEBODY, {from: SOMEBODY}));
-      })
-    });
-
     describe('mint()', async () => {
-      let cost;
       let url;
+      let gisId;
 
       beforeEach('initialize', async () => {
-        await dToken.setReceiver(SOMEBODY);
-
-        cost = 1000;
         url = 'url';
+        gisId = 5;
       });
 
       it('should mint new token', async () => {
-        const result = await dToken.mint(url, cost);
+        const result = await dToken.mint(OWNER, url, gisId);
 
         assert.equal(result.logs.length, 3);
         assert.equal(result.logs[0].event, 'CountersPreIncremented');
         assert.equal(result.logs[1].event, 'Transfer');
-        assert.equal(result.logs[2].event, 'SetedFee');
+        assert.equal(result.logs[2].event, 'SetedGIS');
         
         assert.equal(result.logs[0].args.counter, 0);
         assert.equal(result.logs[1].args.tokenId, 1)
 
         assert.equal(result.logs[1].args.from, ADDRESS_NULL);
-        assert.equal(result.logs[1].args.to, SOMEBODY);
+        assert.equal(result.logs[1].args.to, OWNER);
 
         assert.equal(result.logs[2].args.id, 1);
-        assert.equal(result.logs[2].args.fee, cost);
+        assert.equal(result.logs[2].args.gis, gisId);
       });
 
       it('should mint new token for other user', async () => {
-        dToken.setReceiver(NOBODY);
-        const result = await dToken.mint(url, cost);
+        const result = await dToken.mint(SOMEBODY, url, gisId);
 
         assert.equal(result.logs.length, 3);
         assert.equal(result.logs[1].event, 'Transfer');
 
         assert.equal(result.logs[1].args.from, ADDRESS_NULL);
-        assert.equal(result.logs[1].args.to, NOBODY);
+        assert.equal(result.logs[1].args.to, SOMEBODY);
       });
 
       it('should not access to mint new token by not owner', async () => {
-          await assertReverts(dToken.mint(url, cost, {from: SOMEBODY}));
+          await assertReverts(dToken.mint(NOBODY, url, gisId, {from: SOMEBODY}));
       });
     });
 
-    describe('setPayToken()', async () => {
-      let otherErc20Mock;
+    describe('transferStuckToken()', async () => {
+      const url = 'url';
+      const gisId = 5;
+
+      let tokenAdress;
+      let stuckTokenId;
 
       beforeEach('initialize', async () => {
-        otherErc20Mock = await ERC20Mock.new();
+        tokenAdress = dToken.address;
+
+        await dToken.mint(tokenAdress, url, gisId);
       });
 
-      it('should set new pay token', async () => {
-        const mockAddress = otherErc20Mock.address;
-        const result = await dToken.setPayToken(mockAddress);
+      it('should revert stuck token', async () => {
+        const result = await dToken.transferStuckToken(1, OWNER)
 
-        assert.equal(result.logs.length, 1);
+        assert.equal(result.logs.length, 2);
+
+        assert.equal(result.logs[1].event, 'Transfer');
+
+        assert.equal(result.logs[1].args.from, tokenAdress);
+        assert.equal(result.logs[1].args.to, OWNER);
+      });
+
+      it('should not access revert token by not owner', async () => {
+          await assertReverts(dToken.transferStuckToken(1, OWNER, {from: SOMEBODY}));
+      });
+
+      it('should not access to revert token that was not stucked', async () => {
+        await dToken.mint(NOBODY, url, gisId);
+
+        await assertReverts(dToken.transferStuckToken(2, OWNER));
+      });
+    });
+
+    describe('transferStuckERC20()', async () => {
+      let tokenAdress;
+      let sum;
+      let mockAddress;
+
+      beforeEach('initialize', async () => {
+        const erc20Mock = await ERC20Mock.new();
+
+        tokenAdress = dToken.address;
+        sum = 200;
+        
+        mockAddress = erc20Mock.address;
+        await erc20Mock.mint(tokenAdress, sum);
+      });
+
+      it('should transfer stocked erc20 tokens', async () => {
+        const result = await dToken.transferStuckERC20(mockAddress, OWNER, sum);
+
+        assert.equal(result.logs, 1);
         assert.equal(result.logs[0].event, 'Token');
 
         assert.equal(result.logs[0].args.payToken, mockAddress);
       });
 
-      it('should not access set new pay token by not owner', async () => {
-          await assertReverts(dToken.setPayToken(otherErc20Mock.address, {from: SOMEBODY}));
-      });
-    });
-
-    describe('setPayToken()', async () => {
-      let otherErc20Mock;
-
-      beforeEach('initialize', async () => {
-        otherErc20Mock = await ERC20Mock.new();
+      it('should not access transfer stocked erc20 tokens not owner', async () => {
+          await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum, {from: SOMEBODY}));
       });
 
-      it('should set new pay token', async () => {
-        const mockAddress = otherErc20Mock.address;
-        const result = await dToken.setPayToken(mockAddress);
-
-        assert.equal(result.logs.length, 1);
-        assert.equal(result.logs[0].event, 'Token');
-
-        assert.equal(result.logs[0].args.payToken, mockAddress);
-      });
-
-      it('should not access set new pay token by not owner', async () => {
-          await assertReverts(dToken.setPayToken(otherErc20Mock.address, {from: SOMEBODY}));
-      });
-    });
-
-    describe('tokenFee()', async () => {
-      let cost;
-      let url;
-
-      beforeEach('initialize', async () => {
-        cost = 1000;
-        url = 'url';
-
-        await dToken.setReceiver(SOMEBODY);
-        await dToken.mint(url, cost);
-      });
-
-      it('should get token fee', async () => {
-        const result = await dToken.tokenFee(1);
-
-        assert.equal(result, cost);
-      });
-
-      it('should get token fee from not owner', async () => {
-        const result = await dToken.tokenFee(1, {from: NOBODY});
-
-        assert.equal(result, cost);
+      it('should not access transfer amount of stocked erc20 that more sum', async () => {
+        await assertReverts(dToken.transferStuckERC20(mockAddress, OWNER, sum + 1));
       });
     });
 });

@@ -1,0 +1,36 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "airbnb/base"
+  ],
+  "plugins": [
+  ],
+  "parserOptions": {
+  },
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src"]
+      }
+    }
+  },
+  "rules": {
+    "max-len": ["error", { "code": 120 }],
+    "no-console": "off",
+    "import/prefer-default-export": "off",
+    "no-undef": "off",
+    "no-await-in-loop": "off",
+    "no-plusplus": "off",
+    "no-empty": "off"
+  },
+  "globals": {
+    "artifacts": true,
+    "web3": true,
+    "contract": true,
+    "assert": true
+  }
+}

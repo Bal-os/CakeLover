@@ -81,7 +81,6 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true,
       gasPrice: 10000000000,
-      from: '0x0711BE4a30a2BE3b7902F4E19F9CDB530b34c6F6',
     },
     bsc: {
       provider: () => new HDWalletProvider(process.env.MNENOMIC, 'https://bsc-dataseed1.binance.org', 0, 2),

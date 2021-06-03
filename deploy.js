@@ -1,5 +1,5 @@
-const ArconaERC20Sale = artifacts.require('ArconaERC20Sale');
-const DToken = artifacts.require('DToken');
+const ARCONA = artifacts.require('ARCONA');
+const ARLAND = artifacts.require('ARLAND');
 
 module.exports = async (callback) => {
   console.log('Begin deploy!\n');
@@ -8,16 +8,16 @@ module.exports = async (callback) => {
   const newOwner = '0x9527827538E9120bd1bbdc8A5ddb532F4ed5e75C';
 
   try {
-    const arconaERC20Sale = await ArconaERC20Sale.new(tokenAddress);
-    const dToken = await DToken.new();
+    const arcona = await ARCONA.new(tokenAddress);
+    const arland = await ARLAND.new();
 
     console.log('Contract deployed!');
 
-    await arconaERC20Sale.transferOwnership(newOwner);
-    await dToken.transferOwnership(newOwner);
+    await arcona.transferOwnership(newOwner);
+    await arland.transferOwnership(newOwner);
 
-    console.log('arconaERC20Sale: ', arconaERC20Sale.address);
-    console.log('dToken: ', dToken.address);
+    console.log('arcona: ', arcona.address);
+    console.log('arland: ', arland.address);
     console.log('\nDone!');
   } catch (e) {
     console.log(e.message);

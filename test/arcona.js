@@ -4,24 +4,24 @@ const { solidity } = require('ethereum-waffle');
 use(solidity);
 use(require('chai-as-promised')).should();
 
-const ArconaERC20Sale = artifacts.require('ArconaERC20Sale');
+const ARCONA = artifacts.require('ARCONA');
 const ERC20Mock = artifacts.require('ERC20Mock');
 
 const Helper = require('./helpers/helper');
 const Reverter = require('./helpers/reverter');
 
-contract('ArconaERC20Sale', async (accounts) => {
+contract('ARCONA', async (accounts) => {
   const reverter = new Reverter(web3);
   const h = new Helper();
 
-  let arconaERC20Sale;
+  let arcona;
   let erc20Mock;
 
   const IVAN = accounts[1];
 
   before('setup', async () => {
     erc20Mock = await ERC20Mock.new();
-    arconaERC20Sale = await ArconaERC20Sale.new(erc20Mock.address);
+    arcona = await ARCONA.new(erc20Mock.address);
 
     await reverter.snapshot();
   });
@@ -34,7 +34,7 @@ contract('ArconaERC20Sale', async (accounts) => {
     beforeEach(async () => {
       const tokensToTransfer = h.toWei('500');
       await erc20Mock.transfer(IVAN, tokensToTransfer);
-      await erc20Mock.approve(arconaERC20Sale.address, tokensToTransfer, { from: IVAN });
+      await erc20Mock.approve(arcona.address, tokensToTransfer, { from: IVAN });
     });
 
     it('should exchange tokens', async () => {
@@ -42,18 +42,18 @@ contract('ArconaERC20Sale', async (accounts) => {
         const tokenPrice = i;
         const tokenToExchange = 1 + i;
 
-        await arconaERC20Sale.setTokenPrice(h.toWei(tokenPrice));
-        const tokenWillMint = await arconaERC20Sale.calculateTokensAmountAfterExchange(h.toWei(tokenToExchange));
+        await arcona.setTokenPrice(h.toWei(tokenPrice));
+        const tokenWillMint = await arcona.calculateTokensAmountAfterExchange(h.toWei(tokenToExchange));
 
-        const tokenBalanceBefore = (await arconaERC20Sale.balanceOf(IVAN)).toString();
+        const tokenBalanceBefore = (await arcona.balanceOf(IVAN)).toString();
         const tokenMockBalanceBefore = (await erc20Mock.balanceOf(IVAN)).toString();
-        const contractBalanceBefore = (await erc20Mock.balanceOf(arconaERC20Sale.address)).toString();
+        const contractBalanceBefore = (await erc20Mock.balanceOf(arcona.address)).toString();
 
-        await arconaERC20Sale.exchange(h.toWei(tokenToExchange), { from: IVAN });
+        await arcona.exchange(h.toWei(tokenToExchange), { from: IVAN });
 
-        const tokenBalanceAfter = (await arconaERC20Sale.balanceOf(IVAN)).toString();
+        const tokenBalanceAfter = (await arcona.balanceOf(IVAN)).toString();
         const tokenMockBalanceAfter = (await erc20Mock.balanceOf(IVAN)).toString();
-        const contractBalanceAfter = (await erc20Mock.balanceOf(arconaERC20Sale.address)).toString();
+        const contractBalanceAfter = (await erc20Mock.balanceOf(arcona.address)).toString();
 
         assert.equal(tokenBalanceAfter, h.toBN(tokenBalanceBefore).plus(tokenWillMint).toString());
         assert.equal(tokenMockBalanceAfter, h.toBN(tokenMockBalanceBefore).minus(h.toWei(tokenToExchange)).toString());
@@ -64,7 +64,7 @@ contract('ArconaERC20Sale', async (accounts) => {
     });
 
     it('should revert if token price not set or equal 0', async () => {
-      await expect(arconaERC20Sale.exchange(h.toWei('22'), { from: IVAN }))
+      await expect(arcona.exchange(h.toWei('22'), { from: IVAN }))
         .to.be.revertedWith('E-85');
     });
 
@@ -84,8 +84,8 @@ contract('ArconaERC20Sale', async (accounts) => {
         const tokenWillMint = h.toWei(tokenToExchange).multipliedBy(h.toWei(1)).dividedBy(h.toWei(tokenPrice))
           .toFixed(0);
 
-        await arconaERC20Sale.setTokenPrice(h.toWei(tokenPrice));
-        const tokenWillMintResp = await arconaERC20Sale.calculateTokensAmountAfterExchange(h.toWei(tokenToExchange));
+        await arcona.setTokenPrice(h.toWei(tokenPrice));
+        const tokenWillMintResp = await arcona.calculateTokensAmountAfterExchange(h.toWei(tokenToExchange));
 
         assert.equal(tokenWillMintResp.toString(), tokenWillMint.toString());
       }
@@ -95,29 +95,29 @@ contract('ArconaERC20Sale', async (accounts) => {
   describe('setTokenPrice()', async () => {
     it('should return valid value', async () => {
       const tokenPrice = h.toWei('0.0000001');
-      await arconaERC20Sale.setTokenPrice(tokenPrice);
+      await arcona.setTokenPrice(tokenPrice);
 
-      const newPrice = await arconaERC20Sale.tokenPrice();
+      const newPrice = await arcona.tokenPrice();
       assert.equal(tokenPrice.toString(), newPrice.toString());
 
       const tokenPrice2 = h.toWei('999999999999');
-      await arconaERC20Sale.setTokenPrice(tokenPrice2);
+      await arcona.setTokenPrice(tokenPrice2);
 
-      const newPrice2 = await arconaERC20Sale.tokenPrice();
+      const newPrice2 = await arcona.tokenPrice();
       assert.equal(tokenPrice2.toString(), newPrice2.toString());
     });
   });
 
   describe('mint()', async () => {
     it('should mint token from contract owner', async () => {
-      await arconaERC20Sale.mint(IVAN, '100');
-      const balance = await arconaERC20Sale.balanceOf(IVAN);
+      await arcona.mint(IVAN, '100');
+      const balance = await arcona.balanceOf(IVAN);
 
       assert.equal('100', balance.toString());
     });
 
     it('should revert if caller not the owner', async () => {
-      await expect(arconaERC20Sale.mint(IVAN, '100', { from: IVAN }))
+      await expect(arcona.mint(IVAN, '100', { from: IVAN }))
         .to.be.revertedWith('Ownable: caller is not the owner');
     });
   });

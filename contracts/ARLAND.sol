@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract DToken is ERC721URIStorage, Ownable {
+contract ARLAND is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     
@@ -17,7 +17,7 @@ contract DToken is ERC721URIStorage, Ownable {
     event SetGIS(uint256 id, uint256 gis);
 
 
-    constructor() ERC721("DToken", "DTK") {}
+    constructor() ERC721("Augmented Reality Land", "ARLAND") {}
 
 
     function mint(address _receiver, string memory _tokenURI, uint256 _gisId) external onlyOwner returns (uint256) {

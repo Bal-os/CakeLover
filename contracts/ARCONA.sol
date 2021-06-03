@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /// @notice Contract exchange ERC20 tokens to another ERC20 tokens
-contract ArconaERC20Sale is ERC20('Arcona', 'A'), Ownable {
+contract ARCONA is ERC20('ARCONA', 'ARCONA'), Ownable {
     using SafeMath for uint;
 
     /// @notice Exchange token contract address

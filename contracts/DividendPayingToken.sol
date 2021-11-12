@@ -21,8 +21,7 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
   using SafeMathUint for uint256;
   using SafeMathInt for int256;
 
-  address public immutable CAKE = address(0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82); //CAKE
-
+  address public token;
 
   // With `magnitude`, we can properly distribute dividends even if the amount of received ether is small.
   // For more discussion about choosing the value of `magnitude`,
@@ -47,12 +46,12 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
 
   uint256 public totalDividendsDistributed;
 
-  constructor(string memory _name, string memory _symbol) public ERC20(_name, _symbol) {
-
+  constructor(string memory _name, string memory _symbol, address _token) public ERC20(_name, _symbol) {
+    token = _token;
   }
 
 
-  function distributeCAKEDividends(uint256 amount) public onlyOwner{
+  function distributeDividends(uint256 amount) public onlyOwner{
     require(totalSupply() > 0);
 
     if (amount > 0) {
@@ -78,7 +77,7 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
     if (_withdrawableDividend > 0) {
       withdrawnDividends[user] = withdrawnDividends[user].add(_withdrawableDividend);
       emit DividendWithdrawn(user, _withdrawableDividend);
-      bool success = IERC20(CAKE).transfer(user, _withdrawableDividend);
+      bool success = IERC20(token).transfer(user, _withdrawableDividend);
 
       if(!success) {
         withdrawnDividends[user] = withdrawnDividends[user].sub(_withdrawableDividend);

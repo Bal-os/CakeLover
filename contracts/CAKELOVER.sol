@@ -1,19 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-//
-// $BabyCake proposes an innovative feature in its contract.
-//
-// DIVIDEND YIELD PAID IN CAKE! With the auto-claim feature,
-// simply hold$BabyCake and you'll receive CAKE automatically in your wallet.
-// 
-// Hold Baby Cake and get rewarded in Cake on every transaction!
-//
-//
-// 📱 Telegram: https://t.me/babycakeBSC
-// 🌎 Website: https://www.babycake.app/
-// 🌐 Twitter: https://twitter.com/BabyCakeBSC
-//
-
 pragma solidity ^0.6.2;
 
 import "./DividendPayingToken.sol";
@@ -25,7 +11,7 @@ import "./IUniswapV2Factory.sol";
 import "./IUniswapV2Router.sol";
 
 
-contract BABYCAKE is ERC20, Ownable {
+contract CAKELOVER is ERC20, Ownable {
     using SafeMath for uint256;
 
     IUniswapV2Router02 public uniswapV2Router;
@@ -33,7 +19,7 @@ contract BABYCAKE is ERC20, Ownable {
 
     bool private swapping;
 
-    BABYCAKEDividendTracker public dividendTracker;
+    CAKELOVERDividendTracker public dividendTracker;
 
     address public deadWallet = 0x000000000000000000000000000000000000dEaD;
 
@@ -48,7 +34,7 @@ contract BABYCAKE is ERC20, Ownable {
     uint256 public marketingFee = 5;
     uint256 public totalFees = CAKERewardsFee.add(liquidityFee).add(marketingFee);
 
-    address public _marketingWalletAddress = 0x24e21EF2C3C9C93B5791d77cF934bF92a91276ba;
+    address public _marketingWalletAddress = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
 
 
     // use by default 300,000 gas to process auto-claiming dividends
@@ -82,7 +68,6 @@ contract BABYCAKE is ERC20, Ownable {
     );
 
     event SendDividends(
-    	uint256 tokensSwapped,
     	uint256 amount
     );
 
@@ -95,12 +80,11 @@ contract BABYCAKE is ERC20, Ownable {
     	address indexed processor
     );
 
-    constructor() public ERC20("BABY CAKE", "BABYCAKE") {
+    constructor() public ERC20("CAKE LOVER", "CAKELOVER") {
 
-    	dividendTracker = new BABYCAKEDividendTracker();
+    	dividendTracker = new CAKELOVERDividendTracker(address(this));
 
-
-    	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+    	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xE3Ca443c9fd7AF40A2B5a95d43207E763e56005F);
          // Create a uniswap pair for this new token
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
@@ -126,7 +110,7 @@ contract BABYCAKE is ERC20, Ownable {
             _mint is an internal function in ERC20.sol that is only called here,
             and CANNOT be called ever again
         */
-        _mint(owner(), 100000000000 * (10**18));
+        _mint(owner(), 1000000000000000000 * (10**18));
     }
 
     receive() external payable {
@@ -134,11 +118,11 @@ contract BABYCAKE is ERC20, Ownable {
   	}
 
     function updateDividendTracker(address newAddress) public onlyOwner {
-        require(newAddress != address(dividendTracker), "BABYCAKE: The dividend tracker already has that address");
+        require(newAddress != address(dividendTracker), "CAKELOVER: The dividend tracker already has that address");
 
-        BABYCAKEDividendTracker newDividendTracker = BABYCAKEDividendTracker(payable(newAddress));
+        CAKELOVERDividendTracker newDividendTracker = CAKELOVERDividendTracker(payable(newAddress));
 
-        require(newDividendTracker.owner() == address(this), "BABYCAKE: The new dividend tracker must be owned by the BABYCAKE token contract");
+        require(newDividendTracker.owner() == address(this), "CAKELOVER: The new dividend tracker must be owned by the CAKELOVER token contract");
 
         newDividendTracker.excludeFromDividends(address(newDividendTracker));
         newDividendTracker.excludeFromDividends(address(this));
@@ -151,7 +135,7 @@ contract BABYCAKE is ERC20, Ownable {
     }
 
     function updateUniswapV2Router(address newAddress) public onlyOwner {
-        require(newAddress != address(uniswapV2Router), "BABYCAKE: The router already has that address");
+        require(newAddress != address(uniswapV2Router), "CAKELOVER: The router already has that address");
         emit UpdateUniswapV2Router(newAddress, address(uniswapV2Router));
         uniswapV2Router = IUniswapV2Router02(newAddress);
         address _uniswapV2Pair = IUniswapV2Factory(uniswapV2Router.factory())
@@ -160,7 +144,7 @@ contract BABYCAKE is ERC20, Ownable {
     }
 
     function excludeFromFees(address account, bool excluded) public onlyOwner {
-        require(_isExcludedFromFees[account] != excluded, "BABYCAKE: Account is already the value of 'excluded'");
+        require(_isExcludedFromFees[account] != excluded, "CAKELOVER: Account is already the value of 'excluded'");
         _isExcludedFromFees[account] = excluded;
 
         emit ExcludeFromFees(account, excluded);
@@ -196,7 +180,7 @@ contract BABYCAKE is ERC20, Ownable {
 
 
     function setAutomatedMarketMakerPair(address pair, bool value) public onlyOwner {
-        require(pair != uniswapV2Pair, "BABYCAKE: The PancakeSwap pair cannot be removed from automatedMarketMakerPairs");
+        require(pair != uniswapV2Pair, "CAKELOVER: The PancakeSwap pair cannot be removed from automatedMarketMakerPairs");
 
         _setAutomatedMarketMakerPair(pair, value);
     }
@@ -207,7 +191,7 @@ contract BABYCAKE is ERC20, Ownable {
 
 
     function _setAutomatedMarketMakerPair(address pair, bool value) private {
-        require(automatedMarketMakerPairs[pair] != value, "BABYCAKE: Automated market maker pair is already set to that value");
+        require(automatedMarketMakerPairs[pair] != value, "CAKELOVER: Automated market maker pair is already set to that value");
         automatedMarketMakerPairs[pair] = value;
 
         if(value) {
@@ -219,8 +203,8 @@ contract BABYCAKE is ERC20, Ownable {
 
 
     function updateGasForProcessing(uint256 newValue) public onlyOwner {
-        require(newValue >= 200000 && newValue <= 500000, "BABYCAKE: gasForProcessing must be between 200,000 and 500,000");
-        require(newValue != gasForProcessing, "BABYCAKE: Cannot update gasForProcessing to same value");
+        require(newValue >= 200000 && newValue <= 500000, "CAKELOVER: gasForProcessing must be between 200,000 and 500,000");
+        require(newValue != gasForProcessing, "CAKELOVER: Cannot update gasForProcessing to same value");
         emit GasForProcessingUpdated(newValue, gasForProcessing);
         gasForProcessing = newValue;
     }
@@ -330,7 +314,7 @@ contract BABYCAKE is ERC20, Ownable {
             swapAndLiquify(swapTokens);
 
             uint256 sellTokens = balanceOf(address(this));
-            swapAndSendDividends(sellTokens);
+            sendDividends(sellTokens);
 
             swapping = false;
         }
@@ -404,8 +388,6 @@ contract BABYCAKE is ERC20, Ownable {
 
 
     function swapTokensForEth(uint256 tokenAmount) private {
-
-
         // generate the uniswap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = address(this);
@@ -460,19 +442,13 @@ contract BABYCAKE is ERC20, Ownable {
 
     }
 
-    function swapAndSendDividends(uint256 tokens) private{
-        swapTokensForCake(tokens);
-        uint256 dividends = IERC20(CAKE).balanceOf(address(this));
-        bool success = IERC20(CAKE).transfer(address(dividendTracker), dividends);
-
-        if (success) {
-            dividendTracker.distributeCAKEDividends(dividends);
-            emit SendDividends(tokens, dividends);
-        }
+    function sendDividends(uint256 tokens) private{
+        dividendTracker.distributeDividends(tokens);
+        emit SendDividends(tokens);
     }
 }
 
-contract BABYCAKEDividendTracker is Ownable, DividendPayingToken {
+contract CAKELOVERDividendTracker is Ownable, DividendPayingToken {
     using SafeMath for uint256;
     using SafeMathInt for int256;
     using IterableMapping for IterableMapping.Map;
@@ -492,17 +468,17 @@ contract BABYCAKEDividendTracker is Ownable, DividendPayingToken {
 
     event Claim(address indexed account, uint256 amount, bool indexed automatic);
 
-    constructor() public DividendPayingToken("BABYCAKE_Dividen_Tracker", "BABYCAKE_Dividend_Tracker") {
+    constructor(address _token) public DividendPayingToken("CAKELOVER_Dividen_Tracker", "CAKELOVER_Dividend_Tracker", _token) {
     	claimWait = 3600;
         minimumTokenBalanceForDividends = 200000 * (10**18); //must hold 200000+ tokens
     }
 
     function _transfer(address, address, uint256) internal override {
-        require(false, "BABYCAKE_Dividend_Tracker: No transfers allowed");
+        require(false, "CAKELOVER_Dividend_Tracker: No transfers allowed");
     }
 
     function withdrawDividend() public override {
-        require(false, "BABYCAKE_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main BABYCAKE contract.");
+        require(false, "CAKELOVER_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main CAKELOVER contract.");
     }
 
     function excludeFromDividends(address account) external onlyOwner {
@@ -516,8 +492,8 @@ contract BABYCAKEDividendTracker is Ownable, DividendPayingToken {
     }
 
     function updateClaimWait(uint256 newClaimWait) external onlyOwner {
-        require(newClaimWait >= 3600 && newClaimWait <= 86400, "BABYCAKE_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
-        require(newClaimWait != claimWait, "BABYCAKE_Dividend_Tracker: Cannot update claimWait to same value");
+        require(newClaimWait >= 3600 && newClaimWait <= 86400, "CAKELOVER_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
+        require(newClaimWait != claimWait, "CAKELOVER_Dividend_Tracker: Cannot update claimWait to same value");
         emit ClaimWaitUpdated(newClaimWait, claimWait);
         claimWait = newClaimWait;
     }
@@ -529,8 +505,6 @@ contract BABYCAKEDividendTracker is Ownable, DividendPayingToken {
     function getNumberOfTokenHolders() external view returns(uint256) {
         return tokenHoldersMap.keys.length;
     }
-
-
 
     function getAccount(address _account)
         public view returns (
@@ -561,7 +535,6 @@ contract BABYCAKEDividendTracker is Ownable, DividendPayingToken {
                 iterationsUntilProcessed = index.add(int256(processesUntilEndOfArray));
             }
         }
-
 
         withdrawableDividends = withdrawableDividendOf(account);
         totalDividends = accumulativeDividendOf(account);

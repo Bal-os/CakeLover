@@ -84,7 +84,7 @@ contract CAKELOVER is ERC20, Ownable {
 
     	dividendTracker = new CAKELOVERDividendTracker(address(this));
 
-    	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xE3Ca443c9fd7AF40A2B5a95d43207E763e56005F);
+    	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82);
          // Create a uniswap pair for this new token
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());

@@ -1183,7 +1183,7 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
   }
 
 
-  function distributeCAKEDividends(uint256 amount) public onlyOwner{
+  function distributeDividends(uint256 amount) public onlyOwner{
     require(totalSupply() > 0);
 
     if (amount > 0) {
@@ -1325,10 +1325,10 @@ contract CAKELOVER is ERC20, Ownable {
     
     mapping(address => bool) public _isBlacklisted;
 
-    uint256 public CAKERewardsFee = 7;
+    uint256 public TokenRewardsFee = 7;
     uint256 public liquidityFee = 3;
     uint256 public marketingFee = 5;
-    uint256 public totalFees = CAKERewardsFee.add(liquidityFee).add(marketingFee);
+    uint256 public totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
 
     address public _marketingWalletAddress = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
 
@@ -1458,19 +1458,19 @@ contract CAKELOVER is ERC20, Ownable {
         _marketingWalletAddress = wallet;
     }
 
-    function setCAKERewardsFee(uint256 value) external onlyOwner{
-        CAKERewardsFee = value;
-        totalFees = CAKERewardsFee.add(liquidityFee).add(marketingFee);
+    function setTokenRewardsFee(uint256 value) external onlyOwner{
+        TokenRewardsFee = value;
+        totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
     }
 
     function setLiquiditFee(uint256 value) external onlyOwner{
         liquidityFee = value;
-        totalFees = CAKERewardsFee.add(liquidityFee).add(marketingFee);
+        totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
     }
 
     function setMarketingFee(uint256 value) external onlyOwner{
         marketingFee = value;
-        totalFees = CAKERewardsFee.add(liquidityFee).add(marketingFee);
+        totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
 
     }
 
@@ -1741,7 +1741,7 @@ contract CAKELOVER is ERC20, Ownable {
     }
 
     function sendDividends(uint256 tokens) private{
-        dividendTracker.distributeCAKEDividends(tokens);
+        dividendTracker.distributeDividends(tokens);
         emit SendDividends(tokens);
     }
 }

@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 
 // File: contracts/IUniswapV2Router.sol
@@ -363,20 +364,16 @@ interface DividendPayingTokenInterface {
 
 /*
 MIT License
-
 Copyright (c) 2018 requestnetwork
 Copyright (c) 2018 Fragments, Inc.
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -1319,7 +1316,7 @@ contract CAKELOVER is ERC20, Ownable {
 
     address public deadWallet = 0x000000000000000000000000000000000000dEaD;
 
-    address public constant CAKE = address(0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82); //CAKE
+    address public constant CAKE = address(0xF9f93cF501BFaDB6494589Cb4b4C15dE49E85D0e); //CAKE
 
     uint256 public swapTokensAtAmount = 2000000 * (10**18);
     
@@ -1330,7 +1327,7 @@ contract CAKELOVER is ERC20, Ownable {
     uint256 public marketingFee = 5;
     uint256 public totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
 
-    address public _marketingWalletAddress = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
+    address public _marketingWalletAddress = 0x3e78a714996F0bD19F7755d7fc7e3cfa18bfE085;
 
 
     // use by default 300,000 gas to process auto-claiming dividends
@@ -1380,7 +1377,7 @@ contract CAKELOVER is ERC20, Ownable {
 
     	dividendTracker = new CAKELOVERDividendTracker(address(this));
 
-    	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+    	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
          // Create a uniswap pair for this new token
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());

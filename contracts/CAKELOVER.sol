@@ -1304,7 +1304,7 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
 pragma solidity ^0.6.2;
 
 
-contract CAKELOVER is ERC20, Ownable {
+contract BOXERLOVER is ERC20, Ownable {
     using SafeMath for uint256;
 
     IUniswapV2Router02 public uniswapV2Router;
@@ -1312,15 +1312,13 @@ contract CAKELOVER is ERC20, Ownable {
 
     bool private swapping;
 
-    CAKELOVERDividendTracker public dividendTracker;
+    BOXERLOVERDividendTracker public dividendTracker;
 
     address public deadWallet = 0x000000000000000000000000000000000000dEaD;
 
-    address public constant CAKE = address(0xF9f93cF501BFaDB6494589Cb4b4C15dE49E85D0e); //CAKE
+    address public constant BUSD = address(0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7); //BUSD
 
     uint256 public swapTokensAtAmount = 2000000 * (10**18);
-    
-    mapping(address => bool) public _isBlacklisted;
 
     uint256 public TokenRewardsFee = 7;
     uint256 public liquidityFee = 3;
@@ -1373,9 +1371,9 @@ contract CAKELOVER is ERC20, Ownable {
     	address indexed processor
     );
 
-    constructor() public ERC20("CAKE LOVER", "CAKELOVER") {
+    constructor() public ERC20("BOXER LOVER", "BOXERLOVER") {
 
-    	dividendTracker = new CAKELOVERDividendTracker(address(this));
+    	dividendTracker = new BOXERLOVERDividendTracker(address(this));
 
     	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
          // Create a uniswap pair for this new token
@@ -1411,11 +1409,11 @@ contract CAKELOVER is ERC20, Ownable {
   	}
 
     function updateDividendTracker(address newAddress) public onlyOwner {
-        require(newAddress != address(dividendTracker), "CAKELOVER: The dividend tracker already has that address");
+        require(newAddress != address(dividendTracker), "BOXERLOVER: The dividend tracker already has that address");
 
-        CAKELOVERDividendTracker newDividendTracker = CAKELOVERDividendTracker(payable(newAddress));
+        BOXERLOVERDividendTracker newDividendTracker = BOXERLOVERDividendTracker(payable(newAddress));
 
-        require(newDividendTracker.owner() == address(this), "CAKELOVER: The new dividend tracker must be owned by the CAKELOVER token contract");
+        require(newDividendTracker.owner() == address(this), "BOXERLOVER: The new dividend tracker must be owned by the BOXERLOVER token contract");
 
         newDividendTracker.excludeFromDividends(address(newDividendTracker));
         newDividendTracker.excludeFromDividends(address(this));
@@ -1428,7 +1426,7 @@ contract CAKELOVER is ERC20, Ownable {
     }
 
     function updateUniswapV2Router(address newAddress) public onlyOwner {
-        require(newAddress != address(uniswapV2Router), "CAKELOVER: The router already has that address");
+        require(newAddress != address(uniswapV2Router), "BOXERLOVER: The router already has that address");
         emit UpdateUniswapV2Router(newAddress, address(uniswapV2Router));
         uniswapV2Router = IUniswapV2Router02(newAddress);
         address _uniswapV2Pair = IUniswapV2Factory(uniswapV2Router.factory())
@@ -1437,7 +1435,7 @@ contract CAKELOVER is ERC20, Ownable {
     }
 
     function excludeFromFees(address account, bool excluded) public onlyOwner {
-        require(_isExcludedFromFees[account] != excluded, "CAKELOVER: Account is already the value of 'excluded'");
+        require(_isExcludedFromFees[account] != excluded, "BOXERLOVER: Account is already the value of 'excluded'");
         _isExcludedFromFees[account] = excluded;
 
         emit ExcludeFromFees(account, excluded);
@@ -1460,31 +1458,15 @@ contract CAKELOVER is ERC20, Ownable {
         totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
     }
 
-    function setLiquiditFee(uint256 value) external onlyOwner{
-        liquidityFee = value;
-        totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
-    }
-
-    function setMarketingFee(uint256 value) external onlyOwner{
-        marketingFee = value;
-        totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
-
-    }
-
-
     function setAutomatedMarketMakerPair(address pair, bool value) public onlyOwner {
-        require(pair != uniswapV2Pair, "CAKELOVER: The PancakeSwap pair cannot be removed from automatedMarketMakerPairs");
+        require(pair != uniswapV2Pair, "BOXERLOVER: The PancakeSwap pair cannot be removed from automatedMarketMakerPairs");
 
         _setAutomatedMarketMakerPair(pair, value);
-    }
-    
-    function blacklistAddress(address account, bool value) external onlyOwner{
-        _isBlacklisted[account] = value;
     }
 
 
     function _setAutomatedMarketMakerPair(address pair, bool value) private {
-        require(automatedMarketMakerPairs[pair] != value, "CAKELOVER: Automated market maker pair is already set to that value");
+        require(automatedMarketMakerPairs[pair] != value, "BOXERLOVER: Automated market maker pair is already set to that value");
         automatedMarketMakerPairs[pair] = value;
 
         if(value) {
@@ -1496,8 +1478,8 @@ contract CAKELOVER is ERC20, Ownable {
 
 
     function updateGasForProcessing(uint256 newValue) public onlyOwner {
-        require(newValue >= 200000 && newValue <= 500000, "CAKELOVER: gasForProcessing must be between 200,000 and 500,000");
-        require(newValue != gasForProcessing, "CAKELOVER: Cannot update gasForProcessing to same value");
+        require(newValue >= 200000 && newValue <= 500000, "BOXERLOVER: gasForProcessing must be between 200,000 and 500,000");
+        require(newValue != gasForProcessing, "BOXERLOVER: Cannot update gasForProcessing to same value");
         emit GasForProcessingUpdated(newValue, gasForProcessing);
         gasForProcessing = newValue;
     }
@@ -1581,7 +1563,6 @@ contract CAKELOVER is ERC20, Ownable {
     ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
-        require(!_isBlacklisted[from] && !_isBlacklisted[to], 'Blacklisted address');
 
         if(amount == 0) {
             super._transfer(from, to, 0);
@@ -1649,11 +1630,11 @@ contract CAKELOVER is ERC20, Ownable {
 
     function swapAndSendToFee(uint256 tokens) private  {
 
-        uint256 initialCAKEBalance = IERC20(CAKE).balanceOf(address(this));
+        uint256 initialBUSDBalance = IERC20(BUSD).balanceOf(address(this));
 
-        swapTokensForCake(tokens);
-        uint256 newBalance = (IERC20(CAKE).balanceOf(address(this))).sub(initialCAKEBalance);
-        IERC20(CAKE).transfer(_marketingWalletAddress, newBalance);
+        swapTokensForBusd(tokens);
+        uint256 newBalance = (IERC20(BUSD).balanceOf(address(this))).sub(initialBUSDBalance);
+        IERC20(BUSD).transfer(_marketingWalletAddress, newBalance);
     }
 
     function swapAndLiquify(uint256 tokens) private {
@@ -1701,12 +1682,12 @@ contract CAKELOVER is ERC20, Ownable {
 
     }
 
-    function swapTokensForCake(uint256 tokenAmount) private {
+    function swapTokensForBusd(uint256 tokenAmount) private {
 
         address[] memory path = new address[](3);
         path[0] = address(this);
         path[1] = uniswapV2Router.WETH();
-        path[2] = CAKE;
+        path[2] = BUSD;
 
         _approve(address(this), address(uniswapV2Router), tokenAmount);
 
@@ -1743,7 +1724,7 @@ contract CAKELOVER is ERC20, Ownable {
     }
 }
 
-contract CAKELOVERDividendTracker is Ownable, DividendPayingToken {
+contract BOXERLOVERDividendTracker is Ownable, DividendPayingToken {
     using SafeMath for uint256;
     using SafeMathInt for int256;
     using IterableMapping for IterableMapping.Map;
@@ -1763,17 +1744,17 @@ contract CAKELOVERDividendTracker is Ownable, DividendPayingToken {
 
     event Claim(address indexed account, uint256 amount, bool indexed automatic);
 
-    constructor(address _token) public DividendPayingToken("CAKELOVER_Dividen_Tracker", "CAKELOVER_Dividend_Tracker", _token) {
+    constructor(address _token) public DividendPayingToken("BOXERLOVER_Dividen_Tracker", "BOXERLOVER_Dividend_Tracker", _token) {
     	claimWait = 3600;
         minimumTokenBalanceForDividends = 200000 * (10**18); //must hold 200000+ tokens
     }
 
     function _transfer(address, address, uint256) internal override {
-        require(false, "CAKELOVER_Dividend_Tracker: No transfers allowed");
+        require(false, "BOXERLOVER_Dividend_Tracker: No transfers allowed");
     }
 
     function withdrawDividend() public override {
-        require(false, "CAKELOVER_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main CAKELOVER contract.");
+        require(false, "BOXERLOVER_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main BOXERLOVER contract.");
     }
 
     function excludeFromDividends(address account) external onlyOwner {
@@ -1787,8 +1768,8 @@ contract CAKELOVERDividendTracker is Ownable, DividendPayingToken {
     }
 
     function updateClaimWait(uint256 newClaimWait) external onlyOwner {
-        require(newClaimWait >= 3600 && newClaimWait <= 86400, "CAKELOVER_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
-        require(newClaimWait != claimWait, "CAKELOVER_Dividend_Tracker: Cannot update claimWait to same value");
+        require(newClaimWait >= 3600 && newClaimWait <= 86400, "BOXERLOVER_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
+        require(newClaimWait != claimWait, "BOXERLOVER_Dividend_Tracker: Cannot update claimWait to same value");
         emit ClaimWaitUpdated(newClaimWait, claimWait);
         claimWait = newClaimWait;
     }

@@ -1316,7 +1316,7 @@ contract BOXERLOVER is ERC20, Ownable {
 
     address public deadWallet = 0x000000000000000000000000000000000000dEaD;
 
-    address public constant BUSD = address(0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7); //BUSD
+    address public constant BUSD = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56); //BUSD
 
     uint256 public swapTokensAtAmount = 2000000 * (10**18);
 
@@ -1375,7 +1375,7 @@ contract BOXERLOVER is ERC20, Ownable {
 
     	dividendTracker = new BOXERLOVERDividendTracker(address(this));
 
-    	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+    	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
          // Create a uniswap pair for this new token
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());

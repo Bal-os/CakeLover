@@ -1322,8 +1322,8 @@ contract BOXERLOVER is ERC20, Ownable {
 
     uint256 public TokenRewardsFee = 7;
     uint256 public liquidityFee = 3;
-    uint256 public marketingFee = 5;
-    uint256 public totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
+    uint256 public marketingAndTeamFee = 5;
+    uint256 public totalFees = TokenRewardsFee.add(liquidityFee).add(marketingAndTeamFee);
 
     address public _marketingWalletAddress = 0x3e78a714996F0bD19F7755d7fc7e3cfa18bfE085;
 
@@ -1455,7 +1455,7 @@ contract BOXERLOVER is ERC20, Ownable {
 
     function setTokenRewardsFee(uint256 value) external onlyOwner{
         TokenRewardsFee = value;
-        totalFees = TokenRewardsFee.add(liquidityFee).add(marketingFee);
+        totalFees = TokenRewardsFee.add(liquidityFee).add(marketingAndTeamFee);
     }
 
     function setAutomatedMarketMakerPair(address pair, bool value) public onlyOwner {
@@ -1581,7 +1581,7 @@ contract BOXERLOVER is ERC20, Ownable {
         ) {
             swapping = true;
 
-            uint256 marketingTokens = contractTokenBalance.mul(marketingFee).div(totalFees);
+            uint256 marketingTokens = contractTokenBalance.mul(marketingAndTeamFee).div(totalFees);
             swapAndSendToFee(marketingTokens);
 
             uint256 swapTokens = contractTokenBalance.mul(liquidityFee).div(totalFees);

@@ -1316,7 +1316,7 @@ contract BOXERLOVER is ERC20, Ownable {
 
     address public deadWallet = 0x000000000000000000000000000000000000dEaD;
 
-    address public constant BUSD = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56); //BUSD
+    address public constant BUSD = address(0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7); //BUSD
 
     uint256 public swapTokensAtAmount = 2000000 * (10**18);
 
